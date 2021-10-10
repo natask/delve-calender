@@ -62,7 +62,7 @@
                        ,(format "Filter by %s after selected time in BUF." type)
                        (interactive (list (current-buffer)))
                        (let ((selected-time (make-ts :unix (float-time (org-read-date '(16) 't)))))
-                         (lister-set-filter buf (apply-partially 'delve-calender--filter-time-fn  selected-time ',(car type)))))))
+                         (lister-set-filter (lister-get-ewoc buf) (apply-partially 'delve-calender--filter-time-fn  selected-time ',(car type)))))))
       (fset (intern (concat "delve-calender-filter-select-by" "-" (prin1-to-string (car type)))) closure))))
 
 (cl-defun delve-calender-create-filter-functions (&optional (slots-lt '((:month 0) (:week 0) (:day 0)))
@@ -80,7 +80,7 @@
              (closure `(lambda (buf)
                          ,(format "Filter by %s based on slots %s in BUF." (last (cdr fn-meta)) (butlast (cdr fn-meta)))
                          (interactive (list (current-buffer)))
-                         (lister-set-filter buf (apply-partially 'delve-calender--filter-fn ,@slots ',type)))))
+                         (lister-set-filter (lister-get-ewoc buf) (apply-partially 'delve-calender--filter-fn ,@slots ',type)))))
         (fset (intern (concat "delve-calender-filter-by" (car fn-meta))) closure)))))
 
 (cl-defun delve-calender-ts (&key (type 'strict) day week month year)
