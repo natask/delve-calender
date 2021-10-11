@@ -39,8 +39,8 @@
              (->> (cl-struct-slot-value 'delve-zettel type item)
                   (float-time)
                   (make-ts :unix))))
-        (ts> ts-item time))
-    't))
+        (ts< ts-item time))
+    'nil))
 
 (defun delve-calender--filter-fn (&rest args)
   (declare (advertised-calling-convention (&rest slots type item) nil))
@@ -52,8 +52,8 @@
                (->> (cl-struct-slot-value 'delve-zettel type item)
                     (float-time)
                     (make-ts :unix))))
-          (ts> ts-item (apply #'delve-calender-ts slots)))
-      't)))
+          (ts< ts-item (apply #'delve-calender-ts slots)))
+      'nil)))
 
 (cl-defun delve-calender-create-filter-time-functions (&optional (types '((mtime) (atime) (ctime))))
   "Create functions with prefix and filters derived from TYPES."
@@ -86,23 +86,23 @@
 (cl-defun delve-calender-ts (&key (type 'strict) day week month year)
   "strict verses rolling."
   (--> (ts-now)
-       (if (eq type 'strict)
-           (--> (if day
-                    (ts-apply :hour 0 :minute 0 :second 0 it)
-                  (setq day 0)
-                  it)
-                (if week
-                    (ts-adjust 'day (- (ts-dow it)) it)
-                  (setq week 0)
-                  it)
-                (if month
-                    (ts-apply :hour 0 :minute 0 :second 0 :day 0 it)
-                  (setq month 0)
-                  it)
-                (if year
-                    (ts-apply :hour 0 :minute 0 :second 0 :day 0 :month 0 it)
-                  (setq year 0)
-                  it))
+       (if day
+           (when (eq type 'strict) (ts-apply :hour 0 :minute 0 :second 0 it))
+         (setq day 0)
+         it)
+       (if week
+           (when (eq type 'strict)
+             (ts-apply :hour 0 :minute 0 :second 0 it)
+             (ts-adjust 'day (- (ts-dow it)) it))
+         (setq week 0)
+         it)
+       (if month
+           (when (eq type 'strict) (ts-apply :hour 0 :minute 0 :second 0 :day 0 it))
+         (setq month 0)
+         it)
+       (if year
+           (when (eq type 'strict) (ts-apply :hour 0 :minute 0 :second 0 :day 0 :month 0 it))
+         (setq year 0)
          it)
        (ts-adjust 'day day 'day (* 7 week) 'month month 'year year it)))
 
