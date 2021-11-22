@@ -34,9 +34,9 @@
            a)))
 
 (defun delve-calender--filter-time-fn (time type item)
-  (if (delve-zettel-p item)
+  (if (delve--zettel-p item)
       (let ((ts-item
-             (->> (cl-struct-slot-value 'delve-zettel type item)
+             (->> (cl-struct-slot-value 'org-roam-node type (delve--zettel-node item))
                   (float-time)
                   (make-ts :unix))))
         (ts< ts-item time))
@@ -47,15 +47,15 @@
   (-let* ((slots (butlast args 2))
           (type (car (last args 2)))
           (item (-last-item args)))
-    (if (delve-zettel-p item)
+    (if (delve--zettel-p item)
         (let ((ts-item
-               (->> (cl-struct-slot-value 'delve-zettel type item)
+               (->> (cl-struct-slot-value 'org-roam-node type (delve--zettel-node item))
                     (float-time)
                     (make-ts :unix))))
           (ts< ts-item (apply #'delve-calender-ts slots)))
       'nil)))
 
-(cl-defun delve-calender-create-filter-time-functions (&optional (types '((mtime) (atime) (ctime))))
+(cl-defun delve-calender-create-filter-time-functions (&optional (types '((file-mtime) (file-atime) (ctime))))
   "Create functions with prefix and filters derived from TYPES."
   (dolist (type types)
     (let* ((closure `(lambda (buf)
